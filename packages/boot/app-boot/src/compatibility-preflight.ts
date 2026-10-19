@@ -78,7 +78,9 @@ export function prepareProfileEntries(
   // composition-stage diagnostics go to stderr like the profile launcher's skipped-bundle report.
   return preflight(ctx, entries, parentURL, (row, reason) => {
     // Preset rows may omit ids, and a bundle row's name is its resolved module URL.
-    const label = typeof row.id === 'string' ? `row ${JSON.stringify(row.id)}` : row.name
+    const label = typeof row.id === 'string'
+      ? `row ${JSON.stringify(row.id)}`
+      : typeof row.name === 'string' ? row.name : '<unnamed row>'
     process.stderr.write(`${binName}: disabling profile plugin ${label}: ${reason}\n`)
   }).rows
 }
@@ -120,6 +122,11 @@ function preflight(
     let blocked = false
     for (const row of rows) {
       if (row.disabled === true && !row.group) continue
+      if (typeof row.name !== 'string' || row.name.length === 0) {
+        deny(row, 'its plugin name is missing or not a string')
+        blocked = true
+        continue
+      }
       const conflict = denial(row, base)
       if (conflict !== undefined) {
         deny(row, conflict)

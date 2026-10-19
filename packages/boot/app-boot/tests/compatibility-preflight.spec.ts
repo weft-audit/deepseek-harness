@@ -75,6 +75,15 @@ export function apply() { record('apply:${name}') }
 
 const insert = (...names: string[]) => [{ insert: names.map((name, index) => ({ id: `row-${String(index)}`, name })) }]
 
+it('denies a patch row whose plugin name is missing instead of failing on an undefined read', async () => {
+  const f = fixture()
+  const nameless = load('- id: anonymous-row\n', { schema: entryListSchema })[0] as EntryOptions
+  const effects = await f.run([{ insert: [nameless] }])
+  expect(effects).toEqual([])
+  expect(f.warnings.join('\n')).toContain('plugin name is missing')
+  expect(f.warnings.join('\n')).not.toContain('Cannot read properties of undefined')
+})
+
 it('blocks an incompatible plugin before its module is imported while a compatible sibling loads', async () => {
   const f = fixture()
   f.plugin('denied-plugin', { peer: '^9.0.0' })
