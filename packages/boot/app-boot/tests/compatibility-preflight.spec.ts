@@ -84,6 +84,24 @@ it('denies a patch row whose plugin name is missing instead of failing on an und
   expect(f.warnings.join('\n')).not.toContain('Cannot read properties of undefined')
 })
 
+it('denies a patch row with an empty plugin name', async () => {
+  const f = fixture()
+  const empty = load('- id: empty-name\n  name: ""\n', { schema: entryListSchema })[0] as EntryOptions
+  const effects = await f.run([{ insert: [empty] }])
+  expect(effects).toEqual([])
+  expect(f.warnings.join('\n')).toContain('plugin name is missing')
+  expect(f.warnings.join('\n')).not.toContain('Cannot read properties of undefined')
+})
+
+it('denies a patch row with a non-string plugin name', async () => {
+  const f = fixture()
+  const numeric = load('- id: numeric-name\n  name: 123\n', { schema: entryListSchema })[0] as EntryOptions
+  const effects = await f.run([{ insert: [numeric] }])
+  expect(effects).toEqual([])
+  expect(f.warnings.join('\n')).toContain('plugin name is missing')
+  expect(f.warnings.join('\n')).not.toContain('Cannot read properties of undefined')
+})
+
 it('blocks an incompatible plugin before its module is imported while a compatible sibling loads', async () => {
   const f = fixture()
   f.plugin('denied-plugin', { peer: '^9.0.0' })
