@@ -122,8 +122,8 @@ function preflight(
     let blocked = false
     for (const row of rows) {
       if (row.disabled === true && !row.group) continue
-      if (typeof row.name !== 'string' || row.name.length === 0) {
-        deny(row, 'its plugin name is missing or not a string')
+      if (typeof row.name !== 'string' || row.name.trim().length === 0) {
+        deny(row, 'its plugin name is missing, blank, or not a string')
         blocked = true
         continue
       }

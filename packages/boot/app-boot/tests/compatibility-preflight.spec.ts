@@ -89,8 +89,17 @@ it('denies a patch row with an empty plugin name', async () => {
   const empty = load('- id: empty-name\n  name: ""\n', { schema: entryListSchema })[0] as EntryOptions
   const effects = await f.run([{ insert: [empty] }])
   expect(effects).toEqual([])
-  expect(f.warnings.join('\n')).toContain('plugin name is missing')
+  expect(f.warnings.join('\n')).toContain('plugin name is missing, blank')
   expect(f.warnings.join('\n')).not.toContain('Cannot read properties of undefined')
+})
+
+it('denies a patch row with a whitespace-only plugin name', async () => {
+  const f = fixture()
+  const blank = load('- id: blank-name\n  name: "   "\n', { schema: entryListSchema })[0] as EntryOptions
+  const effects = await f.run([{ insert: [blank] }])
+  expect(effects).toEqual([])
+  expect(f.warnings.join('\n')).toContain('plugin name is missing, blank')
+  expect(f.warnings.join('\n')).not.toContain('Cannot find package')
 })
 
 it('denies a patch row with a non-string plugin name', async () => {
